@@ -28,6 +28,14 @@ app.get("/pic", function (req, res) {
     res.render("pic");
 })
 
+app.post("/pic", function (req,res) {
+    res.render("pic")
+})
+
+app.post("/", function (req,res) {
+    res.redirect("/");
+})
+
 // neuen task beim nach dem post "herausholen" und im array "task" ablegen, danach zu "/" redirecten
 app.post('/addtask', function (req, res) {
     var newTask = req.body.newtask;
