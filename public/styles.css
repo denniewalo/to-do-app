@@ -20,3 +20,30 @@ ul {
     margin: 0;
     padding: 0;
 }
+
+.center {
+    margin: auto;
+    width: 50%;
+    border: 2px solid green;
+    padding: 10px;
+    text-align: center;
+}
+
+.child {
+    margin: 20px 0;
+}
+
+img {
+    width: auto;
+    height: 150px;
+    alignment: center;
+}
+
+ol {
+    text-align: center;
+    list-style-position: inside;
+}
+ol li{
+    list-style-type: none;
+    color:blue;
+}

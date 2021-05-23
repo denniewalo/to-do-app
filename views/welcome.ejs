@@ -1,0 +1,27 @@
+<html>
+    <head>
+        <title> ToDo App - Welcome </title>
+        <link href="https://fonts.googleapis.com/css?family=Lato:100" rel="stylesheet">
+        <link href="welcomeStyle.css" rel="stylesheet">
+    </head>
+    <body>
+        <button class="openbtn" onclick="openNav()">☰ Menü</button>
+        <div id="mySidebar" class="sidebar">
+            <a href="javascript:void(0)" class="closebtn" onclick="closeNav()">×</a>
+            <a href="/create">Erstellen</a>
+            <a href="/show">Ansehen</a>
+        </div>
+    <script>
+        /* Set the width of the sidebar to 250px and the left margin of the page content to 250px */
+        function openNav() {
+            document.getElementById("mySidebar").style.width = "250px";
+            document.getElementById("main").style.marginLeft = "250px";
+        }
+        /* Set the width of the sidebar to 0 and the left margin of the page content to 0 */
+        function closeNav() {
+            document.getElementById("mySidebar").style.width = "0";
+            document.getElementById("main").style.marginLeft = "0";
+        }
+    </script>
+    </body>
+</html>

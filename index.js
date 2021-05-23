@@ -10,10 +10,8 @@ const storage = new Storage({
 });
 
 var app = express();
-
 app.use(bodyParser.urlencoded({ extended: true }));
 app.set("view engine", "ejs");
-//render css files
 app.use(express.static("public"));
 
 // Multer is required to process file uploads and make them available via
@@ -25,88 +23,79 @@ const multer = Multer({
     },
   });
 
+const bucket = storage.bucket('denniealex-bucket');
 
-  const bucket = storage.bucket('denniealex-bucket');
-
-//task-logik -> später mit s3 bucket befüllen
-//const storage = new Storage();
-//const bucket = storage.bucket(process.env.GCLOUD_STORAGE_BUCKET);
-
-//Task-arrays
-var task = [];
-var complete = [];
-
-app.get("/", function(req, res) {    
-    res.render("index", { task: task, complete: complete });
-    //console.log(bucket)
+//Login
+app.get("/", function(req, res) {
+    res.render("login");
 });
 
-app.get("/pic", function (req, res) {
-    res.render("pic");
-})
-
-app.post("/pic", function (req,res) {
-    res.render("pic")
-})
-
-app.post("/", function (req,res) {
-    res.redirect("/");
-})
-
-// neuen task beim nach dem post "herausholen" und im array "task" ablegen, danach zu "/" redirecten
-app.post('/addtask', function (req, res) {
-    var newTask = req.body.newtask;
-    task.push(newTask);
-    res.redirect("/");
-});
-
-app.post('/Upload', multer.single('file'), (req, res, next) => {
-    if (!req.file) {
-      res.status(400).send('No file uploaded.');
-      return;
+app.post("/login", function (req, res){
+    if(req.body.loginName == "Dennie"){
+        res.redirect("/welcome");
+    }else{
+        res.redirect("/");
     }
-  
-    // Create a new blob in the bucket and upload the file data.
-    const blob = bucket.file(req.file.originalname);
-    const blobStream = blob.createWriteStream();
-  
-    blobStream.on('error', err => {
-      next(err);
-    });
-  
-    blobStream.on('finish', () => {
-      // The public URL can be used to directly access the file via HTTP.
-      const publicUrl = format(
-        `https://storage.googleapis.com/${bucket.name}/${blob.name}`
-      );
-      res.status(200).send(publicUrl);
-    });
-  
-    blobStream.end(req.file.buffer);
-  });
+});
 
-app.post("/completetask", function(req, res) {
-    var completeTask = req.body.check;
-    //nach typeof abfrage, wird der task hinzugefügt, in die Liste "complete"
-    if (typeof completeTask === "string") {
-        complete.push(completeTask);
-        //wenn ein taks doppelt ist, soll er entfernt werden
-        task.splice(task.indexOf(completeTask), 1);
-        //Fals task vom typ object ist, dann iterieren
-    } else if (typeof completeTask === "object") {
-        for (var i = 0; i < completeTask.length; i++) {
-            complete.push(completeTask[i]);
-            task.splice(task.indexOf(completeTask[i]), 1);
+//Welcome
+app.get("/welcome", function (req, res){
+   res.render("welcome");
+});
+
+//ToDo
+app.get("/create", function (req, res){
+    res.render("createTodo");
+});
+
+//ShowTasks
+app.get("/show", function (req, res){
+    var tasks = [];
+    var images = [];
+    var googleURL = "https://storage.googleapis.com/"
+    var imagesURL = [];
+    bucket.getFiles(function(err, files) {
+        if (!err) {
+            images = files
+            images.forEach(e => {
+                fileName = e.name;
+                bucketName = e.bucket.id;
+                imageURL = googleURL + bucketName + "/" + fileName;
+                imagesURL.push(imageURL)
+            })
+            res.render("show", {imagesURL: imagesURL});
+        }else{
+            res.render("show")
         }
-    }
-
-    //bucket, nicht verbunden
-    var fileRef = storage.bucket(bucket.name).file("task.txt");
-    fileRef.exists().then(function(data) {
-        console.log("File in database exists ");
     });
-    res.redirect("/");
 });
+
+//CreateTask
+app.post("/createTask", multer.single('file'), function (req,res, next){
+    if (!req.file) {
+        res.status(400).send('No file uploaded.');
+        return;
+    }
+    name = req.file.originalname
+    nameList = name.split(".")
+    newFileName = req.body.newtask + (".") + nameList[1]
+    // Create a new blob in the bucket and upload the file data.
+    const blob = bucket.file(newFileName);
+    const blobStream = blob.createWriteStream();
+
+    blobStream.on('error', err => {
+        next(err);
+    });
+
+    blobStream.on('finish', () => {
+        // The public URL can be used to directly access the file via HTTP.
+        const publicUrl = format(
+            `https://storage.googleapis.com/${bucket.name}/${blob.name}`
+        );
+        res.redirect("/welcome")
+    });
+    blobStream.end(req.file.buffer);
+})
 
 //Läuft auf port 8080
 app.listen(8080, function () {

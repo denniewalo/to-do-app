@@ -1,0 +1,15 @@
+<html>
+    <title> ToDo App - Show </title>
+    <link href="https://fonts.googleapis.com/css?family=Lato:100" rel="stylesheet">
+    <link href="styles.css" rel="stylesheet">
+    <head>
+        <h1 class="center"> Alle Tasks: </h1>
+    </head>
+    <body>
+        <ol>
+            <% for(var i = 0; i < imagesURL.length; i++){ %>
+                <li><img src="<%= imagesURL[i]%>"></li>
+            <% } %>
+        </ol>
+    </body>
+</html>
