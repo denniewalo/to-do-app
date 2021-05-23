@@ -8,6 +8,13 @@ const storage = new Storage({
     keyFilename: path.join(__dirname,"vm-tutorial-310919-961a214ef003.json"),
     projectId: "vm-tutorial-310919"
 });
+const mysql = require("mysql");
+const pool = mysql.createPool({
+    user: process.env.DB_USER,
+    password: process.env.DB_PASS,
+    database: process.env.DB_NAME,
+    socketPath: `/cloudsql/${process.env.INSTANCE_CONNECTION_NAME}`,
+});
 
 var app = express();
 app.use(bodyParser.urlencoded({ extended: true }));
@@ -30,12 +37,16 @@ app.get("/", function(req, res) {
     res.render("login");
 });
 
-app.post("/login", function (req, res){
-    if(req.body.loginName == "Dennie"){
-        res.redirect("/welcome");
-    }else{
-        res.redirect("/");
-    }
+app.post("/login", async (req, res) => {
+    let name = req.body.loginName;
+    const query = "SELECT * FROM users WHERE username=?";
+    pool.query(query, name, (error, results) => {
+        if (!results[0]){
+            res.redirect("/");
+        }else{
+            res.redirect("/welcome");
+        }
+    })
 });
 
 //Welcome
